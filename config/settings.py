@@ -29,6 +29,7 @@ def _load_dotenv() -> None:
 @dataclass(frozen=True)
 class Settings:
     database_path: Path
+    schema_output_path: Path
     api_key: str
     model_name: str
     base_url: str | None
@@ -39,8 +40,14 @@ def get_settings() -> Settings:
     database_path = Path(os.getenv("DATABASE_PATH", "data/campus_trade.db"))
     if not database_path.is_absolute():
         database_path = PROJECT_ROOT / database_path
+    schema_output_path = Path(
+        os.getenv("SCHEMA_OUTPUT_PATH", "output/schema_descriptions.json")
+    )
+    if not schema_output_path.is_absolute():
+        schema_output_path = PROJECT_ROOT / schema_output_path
     return Settings(
         database_path=database_path,
+        schema_output_path=schema_output_path,
         api_key=os.getenv("OPENAI_API_KEY", ""),
         model_name=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         base_url=os.getenv("OPENAI_BASE_URL") or None,

@@ -1,4 +1,6 @@
-crewai>=0.80.0
-crewai-tools>=0.26.0
+crewai==1.15.13
+crewai-tools==1.15.13
+chromadb==1.1.1
 python-dotenv>=1.0.1
 faker>=30.0.0
+openai>=1.0.0

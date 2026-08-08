@@ -12,6 +12,7 @@ scripts/              Runnable command line tools
 src/agents/           CrewAI agent definitions
 src/tasks/            CrewAI task definitions
 src/database/         SQLite access helpers
+src/llm/              LLM integration helpers
 tool/                 Custom CrewAI tools
 ```
 
@@ -34,3 +35,15 @@ python scripts\inspect_database.py --json
 
 The database path comes from `DATABASE_PATH` in `.env` and defaults to
 `data/campus_trade.db`.
+
+## Generate schema JSON with descriptions
+
+```powershell
+python scripts\generate_schema_descriptions.py
+python scripts\generate_schema_descriptions.py --table products
+python scripts\generate_schema_descriptions.py --dry-run
+```
+
+The script reads the table structure, fetches 3 sample rows per table, asks the
+model for a short Chinese description, and saves everything to
+`output/schema_descriptions.json` by default.

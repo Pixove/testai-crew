@@ -86,6 +86,19 @@ class DatabaseInspector:
         ).fetchone()
         return int(row["count"])
 
+    def get_sample_rows(
+        self, table: str, limit: int = 3
+    ) -> list[dict[str, Any]]:
+        """Return up to `limit` sample rows from a table as dicts."""
+        if table not in self.list_tables():
+            raise ValueError(f"Unknown table: {table}")
+        if limit <= 0:
+            return []
+        rows = self._connection.execute(
+            f"SELECT * FROM {self._quote(table)} LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+
     def inspect_table(self, table: str) -> dict[str, Any]:
         if table not in self.list_tables():
             raise ValueError(f"Unknown table: {table}")
