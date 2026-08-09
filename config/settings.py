@@ -30,6 +30,7 @@ def _load_dotenv() -> None:
 class Settings:
     database_path: Path
     schema_output_path: Path
+    business_scenarios_path: Path
     api_key: str
     model_name: str
     base_url: str | None
@@ -45,9 +46,15 @@ def get_settings() -> Settings:
     )
     if not schema_output_path.is_absolute():
         schema_output_path = PROJECT_ROOT / schema_output_path
+    business_scenarios_path = Path(
+        os.getenv("BUSINESS_SCENARIOS_PATH", "output/business_scenarios.json")
+    )
+    if not business_scenarios_path.is_absolute():
+        business_scenarios_path = PROJECT_ROOT / business_scenarios_path
     return Settings(
         database_path=database_path,
         schema_output_path=schema_output_path,
+        business_scenarios_path=business_scenarios_path,
         api_key=os.getenv("OPENAI_API_KEY", ""),
         model_name=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         base_url=os.getenv("OPENAI_BASE_URL") or None,

@@ -11,8 +11,11 @@ data/                 Generated SQLite database and data generator
 scripts/              Runnable command line tools
 src/agents/           CrewAI agent definitions
 src/tasks/            CrewAI task definitions
+src/models/           Pydantic output models
+src/crew/             Crew composition
 src/database/         SQLite access helpers
 src/llm/              LLM integration helpers
+skills/               Agent skill definitions
 tool/                 Custom CrewAI tools
 ```
 
@@ -47,3 +50,13 @@ python scripts\generate_schema_descriptions.py --dry-run
 The script reads the table structure, fetches 3 sample rows per table, asks the
 model for a short Chinese description, and saves everything to
 `output/schema_descriptions.json` by default.
+
+## Run database analyst
+
+```powershell
+python scripts\run_database_analyst.py
+```
+
+The database analyst reads the database schema, extracts normal, boundary and
+exception business scenarios, and saves them to
+`output/business_scenarios.json`.
