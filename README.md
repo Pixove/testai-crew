@@ -69,3 +69,13 @@ python scripts\run_test_case_designer.py
 
 The test case designer reads `output/business_scenarios.json` and writes
 structured test cases to `output/test_cases.json`.
+
+## Run test data generator
+
+```powershell
+python scripts\run_test_data_generator.py
+```
+
+The test data generator reads `output/test_cases.json`, checks the real schema,
+and writes concrete valid, invalid and boundary test data to
+`output/test_data.json`.
