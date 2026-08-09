@@ -60,3 +60,12 @@ python scripts\run_database_analyst.py
 The database analyst reads the database schema, extracts normal, boundary and
 exception business scenarios, and saves them to
 `output/business_scenarios.json`.
+
+## Run test case designer
+
+```powershell
+python scripts\run_test_case_designer.py
+```
+
+The test case designer reads `output/business_scenarios.json` and writes
+structured test cases to `output/test_cases.json`.

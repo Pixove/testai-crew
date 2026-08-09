@@ -31,6 +31,7 @@ class Settings:
     database_path: Path
     schema_output_path: Path
     business_scenarios_path: Path
+    test_cases_path: Path
     api_key: str
     model_name: str
     base_url: str | None
@@ -51,10 +52,16 @@ def get_settings() -> Settings:
     )
     if not business_scenarios_path.is_absolute():
         business_scenarios_path = PROJECT_ROOT / business_scenarios_path
+    test_cases_path = Path(
+        os.getenv("TEST_CASES_PATH", "output/test_cases.json")
+    )
+    if not test_cases_path.is_absolute():
+        test_cases_path = PROJECT_ROOT / test_cases_path
     return Settings(
         database_path=database_path,
         schema_output_path=schema_output_path,
         business_scenarios_path=business_scenarios_path,
+        test_cases_path=test_cases_path,
         api_key=os.getenv("OPENAI_API_KEY", ""),
         model_name=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         base_url=os.getenv("OPENAI_BASE_URL") or None,
