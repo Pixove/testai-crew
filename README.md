@@ -8,6 +8,7 @@ campus second-hand trading SQLite database using multiple CrewAI agents.
 ```text
 config/               Environment and project settings
 data/                 Generated SQLite database and data generator
+input/                User scenario description files
 scripts/              Runnable command line tools
 src/agents/           CrewAI agent definitions
 src/tasks/            CrewAI task definitions
@@ -38,6 +39,16 @@ python scripts\inspect_database.py --json
 
 The database path comes from `DATABASE_PATH` in `.env` and defaults to
 `data/campus_trade.db`.
+
+## Run scenario analyst
+
+```powershell
+python scripts\run_scenario_analyst.py
+```
+
+The scenario analyst reads `input/scenario.md` (or the path configured by
+`SCENARIO_INPUT_PATH`), extracts structured business rules, and saves them to
+`output/scenario_rules.json`.
 
 ## Generate schema JSON with descriptions
 

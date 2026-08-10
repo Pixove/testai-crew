@@ -8,6 +8,7 @@ venv/
 build/
 dist/
 output/
+business/
 
 # Generated data
 data/generate_datal.py
