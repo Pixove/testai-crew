@@ -8,6 +8,7 @@ from crewai.skills import load_skill
 from config.settings import PROJECT_ROOT, get_settings
 from tool.inspect_database import InspectDatabaseTool
 from tool.read_business_scenarios import ReadBusinessScenariosTool
+from tool.read_scenario_rules import ReadScenarioRulesTool
 
 
 def build_test_case_designer() -> Agent:
@@ -26,7 +27,11 @@ def build_test_case_designer() -> Agent:
             api_key=settings.api_key,
             base_url=settings.base_url,
         ),
-        tools=[ReadBusinessScenariosTool(), InspectDatabaseTool()],
+        tools=[
+            ReadScenarioRulesTool(),
+            ReadBusinessScenariosTool(),
+            InspectDatabaseTool(),
+        ],
         skills=skills,
         verbose=True,
     )

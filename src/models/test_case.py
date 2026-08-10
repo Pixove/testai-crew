@@ -12,8 +12,14 @@ class TestCase(BaseModel):
     title: str = Field(description="Short Chinese test case title")
     table: str = Field(description="Primary table under test")
     scenario_id: str = Field(description="Source business scenario id")
+    rule_id: str = Field(
+        default="", description="Source business rule id from scenario_rules.json"
+    )
     category: Literal["normal", "boundary", "exception"]
     priority: Literal["high", "medium", "low"]
+    fields: list[str] = Field(
+        default_factory=list, description="Fields covered by this test case"
+    )
     preconditions: list[str] = Field(
         default_factory=list, description="Conditions that must exist before the test"
     )
