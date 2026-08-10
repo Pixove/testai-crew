@@ -11,9 +11,15 @@ class BusinessScenario(BaseModel):
     id: str = Field(description="Stable scenario id, e.g. products-normal-001")
     title: str = Field(description="Short Chinese scenario title")
     table: str = Field(description="Primary table this scenario targets")
+    rule_id: str = Field(
+        default="", description="Source business rule id from scenario_rules.json"
+    )
     category: Literal["normal", "boundary", "exception"]
     priority: Literal["high", "medium", "low"]
     description: str = Field(description="What the scenario covers and why")
+    fields: list[str] = Field(
+        default_factory=list, description="Fields involved in this scenario"
+    )
     related_tables: list[str] = Field(
         default_factory=list, description="Tables involved in this scenario"
     )
