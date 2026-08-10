@@ -12,6 +12,9 @@ class TestDataRecord(BaseModel):
     test_case_id: str = Field(description="Target test case id")
     table: str = Field(description="Table this data targets")
     scenario_id: str = Field(description="Source business scenario id")
+    rule_id: str = Field(
+        default="", description="Source business rule id from scenario_rules.json"
+    )
     category: Literal["normal", "boundary", "exception"]
     data_type: Literal["valid", "invalid", "boundary"]
     operation: Literal["insert", "update", "delete", "query"] = Field(

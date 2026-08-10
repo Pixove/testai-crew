@@ -12,10 +12,13 @@ def build_test_data_generation_task(agent: Agent) -> Task:
     settings = get_settings()
     return Task(
         description=(
+            "先使用 read_scenario_rules 工具读取字段依赖规则。\n"
             "先使用 read_test_cases 工具读取测试用例文件。\n"
             "再使用 inspect_database 工具核对真实表结构和字段类型。\n"
-            "为每个测试用例生成至少一条测试数据，覆盖 valid/invalid/boundary。\n"
+            "为每个测试用例和规则组合生成至少一条测试数据，覆盖 "
+            "valid/invalid/boundary。\n"
             "字段名必须与表结构一致，主键不能冲突，外键引用要合理。\n"
+            "每条记录必须填写 rule_id。\n"
             "source_file 必须填写 test_cases.json。\n"
             "最终按 TestDataDocument 结构输出 JSON。"
         ),

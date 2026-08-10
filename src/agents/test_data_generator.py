@@ -7,6 +7,7 @@ from crewai.skills import load_skill
 
 from config.settings import PROJECT_ROOT, get_settings
 from tool.inspect_database import InspectDatabaseTool
+from tool.read_scenario_rules import ReadScenarioRulesTool
 from tool.read_test_cases import ReadTestCasesTool
 
 
@@ -26,7 +27,11 @@ def build_test_data_generator() -> Agent:
             api_key=settings.api_key,
             base_url=settings.base_url,
         ),
-        tools=[ReadTestCasesTool(), InspectDatabaseTool()],
+        tools=[
+            ReadScenarioRulesTool(),
+            ReadTestCasesTool(),
+            InspectDatabaseTool(),
+        ],
         skills=skills,
         verbose=True,
     )
