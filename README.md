@@ -102,3 +102,13 @@ python -m pytest automated_tests -v
 The code generator reads the scenario rules, test cases and test data, writes
 executable pytest files under `automated_tests/`, and the generated suite is
 saved to `output/generated_test_suite.json`.
+
+## Run QA reviewer
+
+```powershell
+python scripts\run_qa_reviewer.py
+```
+
+The QA reviewer checks per-rule coverage, missing combinations and test data
+consistency, then writes `output/coverage_report.json` and
+`output/review_report.md`.

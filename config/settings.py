@@ -37,6 +37,8 @@ class Settings:
     scenario_rules_path: Path
     automated_tests_dir: Path
     generated_test_suite_path: Path
+    review_report_path: Path
+    coverage_report_path: Path
     api_key: str
     model_name: str
     base_url: str | None
@@ -87,6 +89,16 @@ def get_settings() -> Settings:
     )
     if not generated_test_suite_path.is_absolute():
         generated_test_suite_path = PROJECT_ROOT / generated_test_suite_path
+    review_report_path = Path(
+        os.getenv("REVIEW_REPORT_PATH", "output/review_report.md")
+    )
+    if not review_report_path.is_absolute():
+        review_report_path = PROJECT_ROOT / review_report_path
+    coverage_report_path = Path(
+        os.getenv("COVERAGE_REPORT_PATH", "output/coverage_report.json")
+    )
+    if not coverage_report_path.is_absolute():
+        coverage_report_path = PROJECT_ROOT / coverage_report_path
     return Settings(
         database_path=database_path,
         schema_output_path=schema_output_path,
@@ -97,6 +109,8 @@ def get_settings() -> Settings:
         scenario_rules_path=scenario_rules_path,
         automated_tests_dir=automated_tests_dir,
         generated_test_suite_path=generated_test_suite_path,
+        review_report_path=review_report_path,
+        coverage_report_path=coverage_report_path,
         api_key=os.getenv("OPENAI_API_KEY", ""),
         model_name=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         base_url=os.getenv("OPENAI_BASE_URL") or None,
