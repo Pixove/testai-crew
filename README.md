@@ -18,6 +18,7 @@ src/database/         SQLite access helpers
 src/llm/              LLM integration helpers
 skills/               Agent skill definitions
 tool/                 Custom CrewAI tools
+automated_tests/      Generated pytest tests
 ```
 
 ## Setup
@@ -90,3 +91,14 @@ python scripts\run_test_data_generator.py
 The test data generator reads `output/test_cases.json`, checks the real schema,
 and writes concrete valid, invalid and boundary test data to
 `output/test_data.json`.
+
+## Run automation code generator
+
+```powershell
+python scripts\run_automation_code_generator.py
+python -m pytest automated_tests -v
+```
+
+The code generator reads the scenario rules, test cases and test data, writes
+executable pytest files under `automated_tests/`, and the generated suite is
+saved to `output/generated_test_suite.json`.

@@ -13,6 +13,7 @@ business/
 # Generated data
 data/generate_datal.py
 *.db
+automated_tests/
 
 # Env / IDE
 .env

@@ -35,6 +35,8 @@ class Settings:
     test_data_path: Path
     scenario_input_path: Path
     scenario_rules_path: Path
+    automated_tests_dir: Path
+    generated_test_suite_path: Path
     api_key: str
     model_name: str
     base_url: str | None
@@ -75,6 +77,16 @@ def get_settings() -> Settings:
     )
     if not scenario_rules_path.is_absolute():
         scenario_rules_path = PROJECT_ROOT / scenario_rules_path
+    automated_tests_dir = Path(
+        os.getenv("AUTOMATED_TESTS_DIR", "automated_tests")
+    )
+    if not automated_tests_dir.is_absolute():
+        automated_tests_dir = PROJECT_ROOT / automated_tests_dir
+    generated_test_suite_path = Path(
+        os.getenv("GENERATED_TEST_SUITE_PATH", "output/generated_test_suite.json")
+    )
+    if not generated_test_suite_path.is_absolute():
+        generated_test_suite_path = PROJECT_ROOT / generated_test_suite_path
     return Settings(
         database_path=database_path,
         schema_output_path=schema_output_path,
@@ -83,6 +95,8 @@ def get_settings() -> Settings:
         test_data_path=test_data_path,
         scenario_input_path=scenario_input_path,
         scenario_rules_path=scenario_rules_path,
+        automated_tests_dir=automated_tests_dir,
+        generated_test_suite_path=generated_test_suite_path,
         api_key=os.getenv("OPENAI_API_KEY", ""),
         model_name=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         base_url=os.getenv("OPENAI_BASE_URL") or None,
