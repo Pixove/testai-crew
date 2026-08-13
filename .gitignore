@@ -15,6 +15,10 @@ data/generate_datal.py
 *.db
 automated_tests/
 
+# Local scenario files
+input/*.md
+!input/.gitkeep
+
 # Env / IDE
 .env
 .idea/
