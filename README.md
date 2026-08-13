@@ -1,7 +1,8 @@
 # AI Test Case Generation with CrewAI
 
-Project skeleton for generating AI-powered automation test cases from a
-campus second-hand trading SQLite database using multiple CrewAI agents.
+Scenario-driven test generation: a user writes a business scenario, and
+CrewAI agents turn it into rules, business scenarios, test cases, test data,
+pytest code, and a final coverage review for a SQLite database.
 
 ## Structure
 
@@ -18,7 +19,8 @@ src/database/         SQLite access helpers
 src/llm/              LLM integration helpers
 skills/               Agent skill definitions
 tool/                 Custom CrewAI tools
-automated_tests/      Generated pytest tests
+business/             Local business rules and DB migrations (gitignored)
+automated_tests/      Generated pytest tests (gitignored)
 ```
 
 ## Setup
@@ -40,6 +42,19 @@ python scripts\inspect_database.py --json
 
 The database path comes from `DATABASE_PATH` in `.env` and defaults to
 `data/campus_trade.db`.
+
+## Quick start
+
+```powershell
+# 1. Put the scenario description into input/scenario.md
+# 2. Run the full pipeline
+python scripts\run_pipeline.py
+# 3. Run the generated tests
+python -m pytest automated_tests -v
+```
+
+The full pipeline is the recommended entry point. `output/` and
+`automated_tests/` are generated artifacts and are gitignored.
 
 ## Run scenario analyst
 
@@ -69,9 +84,9 @@ model for a short Chinese description, and saves everything to
 python scripts\run_database_analyst.py
 ```
 
-The database analyst reads the database schema, extracts normal, boundary and
-exception business scenarios, and saves them to
-`output/business_scenarios.json`.
+The database analyst reads `scenario_rules.json`, checks the real database
+schema, and generates only rule-related normal, boundary and exception
+scenarios to `output/business_scenarios.json`.
 
 ## Run test case designer
 
@@ -79,8 +94,9 @@ exception business scenarios, and saves them to
 python scripts\run_test_case_designer.py
 ```
 
-The test case designer reads `output/business_scenarios.json` and writes
-structured test cases to `output/test_cases.json`.
+The test case designer reads the scenario rules and business scenarios, builds
+a field combination matrix, and writes structured test cases to
+`output/test_cases.json`.
 
 ## Run test data generator
 
@@ -88,8 +104,8 @@ structured test cases to `output/test_cases.json`.
 python scripts\run_test_data_generator.py
 ```
 
-The test data generator reads `output/test_cases.json`, checks the real schema,
-and writes concrete valid, invalid and boundary test data to
+The test data generator reads the scenario rules and test cases, checks the
+real schema, and writes concrete valid, invalid and boundary test data to
 `output/test_data.json`.
 
 ## Run automation code generator
@@ -101,7 +117,8 @@ python -m pytest automated_tests -v
 
 The code generator reads the scenario rules, test cases and test data, writes
 executable pytest files under `automated_tests/`, and the generated suite is
-saved to `output/generated_test_suite.json`.
+saved to `output/generated_test_suite.json`. Use `--reuse` to regenerate the
+files from the existing suite without calling the LLM.
 
 ## Run QA reviewer
 
@@ -111,4 +128,19 @@ python scripts\run_qa_reviewer.py
 
 The QA reviewer checks per-rule coverage, missing combinations and test data
 consistency, then writes `output/coverage_report.json` and
-`output/review_report.md`.
+`output/review_report.md`. Use `--reuse` to regenerate the reports from an
+existing `coverage_report.json`.
+
+Generated tests run against a local database that must contain the scenario
+fields and triggers. Scenario-specific migrations live in `business/` and are
+gitignored on purpose.
+
+## Run full pipeline
+
+```powershell
+python scripts\run_pipeline.py
+```
+
+This runs all six agents in sequence, from `input/scenario.md` to
+`output/review_report.md`, and writes the generated pytest files under
+`automated_tests/`.
