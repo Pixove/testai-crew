@@ -49,8 +49,8 @@ The database path comes from `DATABASE_PATH` in `.env` and defaults to
 # 1. Put the scenario description into input/scenario.md
 # 2. Run the full pipeline
 python scripts\run_pipeline.py
-# 3. Run the generated tests
-python -m pytest automated_tests -v
+# 3. Run the generated test file(s) shown in the pipeline output
+python -m pytest automated_tests\test_orders.py -v
 ```
 
 The full pipeline is the recommended entry point. `output/` and
@@ -150,3 +150,7 @@ To run a different scenario file without overwriting the default input:
 ```powershell
 python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
 ```
+
+Running the whole `automated_tests/` directory may include stale test files
+from earlier scenarios. Use the specific test file paths printed by the
+pipeline.

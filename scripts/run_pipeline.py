@@ -16,7 +16,7 @@ from src.models.generated_suite import GeneratedTestSuite
 from src.models.review import ReviewReport
 
 
-def write_generated_tests(settings) -> None:
+def write_generated_tests(settings) -> list[str]:
     suite_path = settings.generated_test_suite_path
     if not suite_path.exists():
         raise FileNotFoundError(f"Generated test suite not found: {suite_path}")
@@ -24,6 +24,7 @@ def write_generated_tests(settings) -> None:
         suite_path.read_text(encoding="utf-8")
     )
     base_dir = settings.automated_tests_dir.resolve()
+    written: list[str] = []
     for test_file in suite.test_files:
         target = (base_dir / test_file.path).resolve()
         if not target.is_relative_to(base_dir):
@@ -31,6 +32,8 @@ def write_generated_tests(settings) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(test_file.content, encoding="utf-8")
         print(f"Wrote: {target}")
+        written.append(str(target))
+    return written
 
 
 def review_to_markdown(report: ReviewReport) -> str:
@@ -102,7 +105,7 @@ def main() -> None:
     print("\n=== FULL PIPELINE RESULT ===")
     print(result)
 
-    write_generated_tests(settings)
+    test_files = write_generated_tests(settings)
     write_review_reports(settings)
 
     print("\nOutputs:")
@@ -113,7 +116,11 @@ def main() -> None:
     print(f"  {settings.generated_test_suite_path}")
     print(f"  {settings.coverage_report_path}")
     print(f"  {settings.review_report_path}")
-    print(f"\nRun tests with: python -m pytest {settings.automated_tests_dir} -v")
+    if test_files:
+        command = " ".join(test_files)
+        print(f"\nRun tests with: python -m pytest {command} -v")
+    else:
+        print("\nNo generated pytest test files found.")
 
 
 if __name__ == "__main__":
