@@ -19,6 +19,7 @@ def build_scenario_analysis_task(agent: Agent) -> Task:
             "target_tables 和 BusinessRule.table 必须使用数据库真实表名，"
             "例如 products，不能使用“商品表”这类中文名称。\n"
             "不要编造场景文件中不存在的规则。\n"
+            "只输出纯 JSON，不要 Markdown 代码块、标题或额外解释。\n"
             "最终按 ScenarioRulesDocument 结构输出 JSON。"
         ),
         expected_output=(

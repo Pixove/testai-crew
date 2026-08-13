@@ -18,6 +18,7 @@ def build_schema_analysis_task(agent: Agent) -> Task:
             "只分析规则涉及的表和字段，不要全库生成场景。\n"
             "为每条规则生成 normal/boundary/exception 三类场景。\n"
             "每个 scenario 必须填写 rule_id 和 fields。\n"
+            "只输出纯 JSON，不要 Markdown 代码块、标题或额外解释。\n"
             "最终按 BusinessScenarioDocument 结构输出 JSON。"
         ),
         expected_output=(

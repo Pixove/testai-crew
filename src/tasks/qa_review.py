@@ -19,6 +19,7 @@ def build_qa_review_task(agent: Agent) -> Task:
             "检查组合矩阵是否覆盖 allowed、forbidden、boundary 和 NULL。\n"
             "列出缺失或覆盖不完整的组合。\n"
             "按 0 到 100 分给出质量评分，并给出改进建议和最终结论。\n"
+            "只输出纯 JSON，不要 Markdown 代码块、标题或额外解释。\n"
             "最终按 ReviewReport 结构输出 JSON。"
         ),
         expected_output=(

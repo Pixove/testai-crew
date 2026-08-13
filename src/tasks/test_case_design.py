@@ -23,6 +23,7 @@ def build_test_case_design_task(agent: Agent) -> Task:
             "related_tables。\n"
             "source_file 必须填写 business_scenarios.json。\n"
             "测试数据必须具体并符合表字段类型，预期结果必须可验证。\n"
+            "只输出纯 JSON，不要 Markdown 代码块、标题或额外解释。\n"
             "最终按 TestCaseDocument 结构输出 JSON。"
         ),
         expected_output=(

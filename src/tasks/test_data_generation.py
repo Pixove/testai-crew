@@ -20,6 +20,7 @@ def build_test_data_generation_task(agent: Agent) -> Task:
             "字段名必须与表结构一致，主键不能冲突，外键引用要合理。\n"
             "每条记录必须填写 rule_id。\n"
             "source_file 必须填写 test_cases.json。\n"
+            "只输出纯 JSON，不要 Markdown 代码块、标题或额外解释。\n"
             "最终按 TestDataDocument 结构输出 JSON。"
         ),
         expected_output=(
