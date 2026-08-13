@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -81,6 +83,19 @@ def write_review_reports(settings) -> None:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Run the full scenario-driven test generation pipeline"
+    )
+    parser.add_argument(
+        "--scenario-file",
+        default=None,
+        help="Path to the scenario file (default: SCENARIO_INPUT_PATH)",
+    )
+    args = parser.parse_args()
+
+    if args.scenario_file:
+        os.environ["SCENARIO_INPUT_PATH"] = str(Path(args.scenario_file).resolve())
+
     settings = get_settings()
     crew = build_full_pipeline_crew()
     result = crew.kickoff()

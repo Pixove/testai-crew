@@ -144,3 +144,9 @@ python scripts\run_pipeline.py
 This runs all six agents in sequence, from `input/scenario.md` to
 `output/review_report.md`, and writes the generated pytest files under
 `automated_tests/`.
+
+To run a different scenario file without overwriting the default input:
+
+```powershell
+python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
+```
