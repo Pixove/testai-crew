@@ -154,3 +154,15 @@ python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
 Running the whole `automated_tests/` directory may include stale test files
 from earlier scenarios. Use the specific test file paths printed by the
 pipeline.
+
+## Sample scenario
+
+```powershell
+python -m pytest samples\orders-rule-scenario\automated_tests -v
+```
+
+`samples/orders-rule-scenario/` contains a committed runnable sample for the
+`orders` rules, including the sample database, generated artifacts and pytest
+files. The sample intentionally leaves the `status` enum rule unimplemented,
+so running its tests shows expected `规则未落地` failures alongside passing
+cases.

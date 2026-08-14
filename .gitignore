@@ -13,6 +13,7 @@ business/
 # Generated data
 data/generate_datal.py
 *.db
+!samples/**/*.db
 automated_tests/
 
 # Local scenario files
