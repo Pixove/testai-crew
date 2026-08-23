@@ -14,7 +14,7 @@ business/
 data/generate_datal.py
 *.db
 !samples/**/*.db
-automated_tests/
+/automated_tests/
 
 # Local scenario files
 input/*.md
