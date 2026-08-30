@@ -34,7 +34,8 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-然后编辑 `.env`，填入你的模型接口配置。
+然后编辑 `.env`，填入你的模型接口配置。后续命令建议使用
+`.\venv\Scripts\python.exe`，避免误用全局 Python 环境。
 
 ## 快速开始
 
@@ -45,10 +46,10 @@ Copy-Item .env.example .env
 python scripts\run_pipeline.py
 ```
 
-3. 运行本次生成的测试文件（以流水线输出为准）：
+3. 运行流水线最后打印出的测试文件路径，例如：
 
 ```powershell
-python -m pytest automated_tests\test_orders.py -v
+python -m pytest automated_tests\test_products.py -v
 ```
 
 也可以指定其他场景文件，不需要覆盖默认输入：
@@ -118,9 +119,9 @@ python -m pytest samples\orders-rule-scenario\automated_tests -v
 
 ## 注意事项
 
-- `output/`、`automated_tests/` 都是生成产物，默认不提交。
-- 数据库不提交；`samples/**/*.db` 作为测试样本数据库例外提交。
-- `business/` 里的本地迁移脚本不提交，属于当前场景专属业务逻辑。
-- 如果生成测试需要数据库里有对应字段和触发器，请先运行 `business/` 下的本地迁移脚本。
-- 项目已通过 `.env` 关闭 CrewAI 遥测上传。
-- 所有 Agent Task 都要求输出纯 JSON，避免模型不支持结构化输出时触发额外转换。
+- 未在 `.env` 中配置的路径会使用 `config/settings.py` 里的默认值，
+  通常不需要全部配置。
+- 数据库不随项目提交；运行样本测试时，`samples/orders-rule-scenario/`
+  自带 `sample.db`，无需额外准备。
+- 要在本地数据库上执行生成测试时，需要自行准备对应的字段和触发器；
+  业务迁移脚本属于本地场景逻辑，不随项目提交。
