@@ -8,6 +8,7 @@ from crewai.skills import load_skill
 from config.settings import PROJECT_ROOT, get_settings
 from tool.inspect_database import InspectDatabaseTool
 from tool.read_business_scenarios import ReadBusinessScenariosTool
+from tool.read_pytest_result import ReadPytestResultTool
 from tool.read_scenario_rules import ReadScenarioRulesTool
 from tool.read_test_cases import ReadTestCasesTool
 from tool.read_test_data import ReadTestDataTool
@@ -34,6 +35,7 @@ def build_qa_reviewer() -> Agent:
             ReadBusinessScenariosTool(),
             ReadTestCasesTool(),
             ReadTestDataTool(),
+            ReadPytestResultTool(),
             InspectDatabaseTool(),
         ],
         skills=skills,

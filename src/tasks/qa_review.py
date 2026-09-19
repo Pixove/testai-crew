@@ -14,11 +14,14 @@ def build_qa_review_task(agent: Agent) -> Task:
         description=(
             "先使用 read_scenario_rules、read_business_scenarios、read_test_cases "
             "和 read_test_data 工具读取所有产物。\n"
+            "再使用 read_pytest_result 工具读取真实 pytest 执行结果，"
+            "分析通过数、失败数以及“规则未落地”“字段未落地”失败。\n"
             "再使用 inspect_database 工具核对真实表结构。\n"
             "为每条规则统计关联的场景数、用例数和数据记录数。\n"
             "检查组合矩阵是否覆盖 allowed、forbidden、boundary 和 NULL。\n"
             "列出缺失或覆盖不完整的组合。\n"
-            "按 0 到 100 分给出质量评分，并给出改进建议和最终结论。\n"
+            "给出改进建议和最终结论；quality_score 先给出初步值，"
+            "流水线会用确定性指标覆盖它。\n"
             "只输出纯 JSON，不要 Markdown 代码块、标题或额外解释。\n"
             "最终按 ReviewReport 结构输出 JSON。"
         ),

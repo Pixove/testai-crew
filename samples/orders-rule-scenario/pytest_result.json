@@ -1,0 +1,49 @@
+{
+  "available": true,
+  "total": 29,
+  "passed": 24,
+  "failed": 5,
+  "errors": 0,
+  "skipped": 0,
+  "pass_rate": 0.8276,
+  "failures": [
+    {
+      "name": "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_024",
+      "type": "failure",
+      "message": "Failed: 规则未落地: status=NULL 不在五个枚举值中，但数据库接受了插入"
+    },
+    {
+      "name": "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_025",
+      "type": "failure",
+      "message": "Failed: 规则未落地: status='' 不属于任何枚举值，但数据库接受了插入"
+    },
+    {
+      "name": "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_026",
+      "type": "failure",
+      "message": "Failed: 规则未落地: status=“已关闭”不在枚举列表中，但数据库接受了插入"
+    },
+    {
+      "name": "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_027",
+      "type": "failure",
+      "message": "Failed: 规则未落地: status='Cancelled' 不在枚举列表中，但数据库接受了插入"
+    },
+    {
+      "name": "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_028",
+      "type": "failure",
+      "message": "Failed: 规则未落地: status=“已完成 ”带尾部空格与枚举值不精确匹配，但数据库接受了插入"
+    }
+  ],
+  "rule_not_landed": [
+    "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_024",
+    "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_025",
+    "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_026",
+    "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_027",
+    "samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_028"
+  ],
+  "field_not_landed": [],
+  "command": "D:\\IDE\\VSCode\\CrewAI\\testai-crew\\venv\\Scripts\\python.exe -m pytest samples\\orders-rule-scenario\\automated_tests\\test_orders.py -q --junitxml=D:\\IDE\\VSCode\\CrewAI\\testai-crew\\output\\pytest_junit.xml",
+  "exit_code": 1,
+  "timed_out": false,
+  "stdout_tail": "\ndb_conn = <sqlite3.Connection object at 0x0000022EBF23B970>\n\n    def test_tc_orders_026(db_conn):\n        '''TC-orders-026: \\u8ba2\\u5355\\u72b6\\u6001\\u4e3a\\u679a\\u4e3e\\u5916\\u4e2d\\u6587\\u503c\\u65f6\\u6821\\u9a8c\\u5931\\u8d25.'''\n        _assert_fields_present(db_conn, 'orders', ORDERS_FIELDS)\n        _ensure_product(db_conn)\n        _clean_order(db_conn, 1026)\n        fields = {\n            'order_id': 1026,\n            'product_id': 1,\n            'buyer_id': 7,\n            'seller_id': 29,\n            'deal_price': 45.0,\n            'status': '\\u5df2\\u5173\\u95ed',\n            'created_at': '2024-06-18 09:00:00',\n            'completed_at': None,\n        }\n        err = _try_insert(db_conn, 'orders', fields)\n        if err is None:\n>           pytest.fail('\\u89c4\\u5219\\u672a\\u843d\\u5730: status=\\u201c\\u5df2\\u5173\\u95ed\\u201d\\u4e0d\\u5728\\u679a\\u4e3e\\u5217\\u8868\\u4e2d\\uff0c\\u4f46\\u6570\\u636e\\u5e93\\u63a5\\u53d7\\u4e86\\u63d2\\u5165')\nE           Failed: ����δ���: status=���ѹرա�����ö���б��У������ݿ�����˲���\n\nsamples\\orders-rule-scenario\\automated_tests\\test_orders.py:631: Failed\n_____________________________ test_tc_orders_027 ______________________________\n\ndb_conn = <sqlite3.Connection object at 0x0000022EBF23AD40>\n\n    def test_tc_orders_027(db_conn):\n        '''TC-orders-027: \\u8ba2\\u5355\\u72b6\\u6001\\u4e3a\\u82f1\\u6587\\u5927\\u5c0f\\u5199\\u503c\\u65f6\\u6821\\u9a8c\\u5931\\u8d25.'''\n        _assert_fields_present(db_conn, 'orders', ORDERS_FIELDS)\n        _ensure_product(db_conn)\n        _clean_order(db_conn, 1027)\n        fields = {\n            'order_id': 1027,\n            'product_id': 1,\n            'buyer_id': 7,\n            'seller_id': 29,\n            'deal_price': 45.0,\n            'status': 'Cancelled',\n            'created_at': '2024-06-18 10:00:00',\n            'completed_at': None,\n        }\n        err = _try_insert(db_conn, 'orders', fields)\n        if err is None:\n>           pytest.fail('\\u89c4\\u5219\\u672a\\u843d\\u5730: status=\\'Cancelled\\' \\u4e0d\\u5728\\u679a\\u4e3e\\u5217\\u8868\\u4e2d\\uff0c\\u4f46\\u6570\\u636e\\u5e93\\u63a5\\u53d7\\u4e86\\u63d2\\u5165')\nE           Failed: ����δ���: status='Cancelled' ����ö���б��У������ݿ�����˲���\n\nsamples\\orders-rule-scenario\\automated_tests\\test_orders.py:651: Failed\n_____________________________ test_tc_orders_028 ______________________________\n\ndb_conn = <sqlite3.Connection object at 0x0000022EBF23A4D0>\n\n    def test_tc_orders_028(db_conn):\n        '''TC-orders-028: \\u8ba2\\u5355\\u72b6\\u6001\\u5e26\\u591a\\u4f59\\u7a7a\\u683c\\u65f6\\u6821\\u9a8c\\u5931\\u8d25.'''\n        _assert_fields_present(db_conn, 'orders', ORDERS_FIELDS)\n        _ensure_product(db_conn)\n        _clean_order(db_conn, 1028)\n        fields = {\n            'order_id': 1028,\n            'product_id': 1,\n            'buyer_id': 7,\n            'seller_id': 29,\n            'deal_price': 45.0,\n            'status': '\\u5df2\\u5b8c\\u6210 ',\n            'created_at': '2024-06-19 09:00:00',\n            'completed_at': '2024-06-19 12:00:00',\n        }\n        err = _try_insert(db_conn, 'orders', fields)\n        if err is None:\n>           pytest.fail('\\u89c4\\u5219\\u672a\\u843d\\u5730: status=\\u201c\\u5df2\\u5b8c\\u6210 \\u201d\\u5e26\\u5c3e\\u90e8\\u7a7a\\u683c\\u4e0e\\u679a\\u4e3e\\u503c\\u4e0d\\u7cbe\\u786e\\u5339\\u914d\\uff0c\\u4f46\\u6570\\u636e\\u5e93\\u63a5\\u53d7\\u4e86\\u63d2\\u5165')\nE           Failed: ����δ���: status=������� ����β���ո���ö��ֵ����ȷƥ�䣬�����ݿ�����˲���\n\nsamples\\orders-rule-scenario\\automated_tests\\test_orders.py:671: Failed\n=========================== short test summary info ===========================\nFAILED samples/orders-rule-scenario/automated_tests/test_orders.py::test_tc_orders_024\nFAILED samples/orders-rule-scenario/automated_tests/test_orders.py::test_tc_orders_025\nFAILED samples/orders-rule-scenario/automated_tests/test_orders.py::test_tc_orders_026\nFAILED samples/orders-rule-scenario/automated_tests/test_orders.py::test_tc_orders_027\nFAILED samples/orders-rule-scenario/automated_tests/test_orders.py::test_tc_orders_028\n5 failed, 24 passed in 0.40s\n",
+  "stderr_tail": ""
+}

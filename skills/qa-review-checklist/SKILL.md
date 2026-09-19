@@ -14,12 +14,15 @@ produce a final quality evaluation.
 
 1. Use `read_scenario_rules`, `read_business_scenarios`, `read_test_cases` and
    `read_test_data` to read all generated artifacts.
-2. For every rule, count linked scenarios, test cases and data records.
-3. Check the combination matrix:
+2. Use `read_pytest_result` to read the real pytest execution result, including
+   pass/fail counts and failure messages such as `规则未落地` or `字段未落地`.
+3. For every rule, count linked scenarios, test cases and data records.
+4. Check the combination matrix:
    - allowed values
    - forbidden values
    - boundary values
    - NULL behavior
-4. List every combination that is missing or only partially covered.
-5. Score the suite from 0 to 100 based on coverage completeness and consistency.
-6. Output `ReviewReport` JSON with recommendations and a final conclusion.
+5. List every combination that is missing or only partially covered.
+6. Provide a provisional `quality_score`; the pipeline replaces it with a
+   deterministic score computed from coverage and execution results.
+7. Output `ReviewReport` JSON with recommendations and a final conclusion.

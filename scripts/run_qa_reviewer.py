@@ -13,8 +13,12 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from config.settings import get_settings
 from src.agents.qa_reviewer import build_qa_reviewer
 from src.crew.qa_reviewer import build_qa_review_crew
+from src.models.review import QualityMetrics as QualityMetricsModel
 from src.models.review import ReviewReport
+from src.quality.report import review_to_markdown
+from src.quality.scorer import score_suite
 from src.tasks.qa_review import build_qa_review_task
+from src.testing.pytest_runner import load_result
 
 
 def _extract_json(text: str) -> ReviewReport:
@@ -48,42 +52,6 @@ def _to_report(result: object) -> ReviewReport:
     return _extract_json(str(result))
 
 
-def _to_markdown(report: ReviewReport) -> str:
-    lines = [
-        "# QA Review Report",
-        "",
-        report.summary,
-        "",
-        "## Coverage Matrix",
-        "",
-        "| Rule | Scenarios | Test Cases | Data Records | Covered |",
-        "|------|-----------|------------|--------------|---------|",
-    ]
-    for item in report.coverage_items:
-        lines.append(
-            f"| {item.rule_id} | {item.scenario_count} | "
-            f"{item.test_case_count} | {item.data_record_count} | "
-            f"{item.covered} |"
-        )
-    lines.append("")
-    lines.append("## Missing Combinations")
-    if report.missing_combinations:
-        for combo in report.missing_combinations:
-            lines.append(f"- {combo}")
-    else:
-        lines.append("- None")
-    lines.append("")
-    lines.append(f"## Quality Score: {report.quality_score}/100")
-    lines.append("")
-    lines.append("## Recommendations")
-    for rec in report.recommendations:
-        lines.append(f"- {rec}")
-    lines.append("")
-    lines.append("## Conclusion")
-    lines.append(report.conclusion)
-    return "\n".join(lines)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate QA review reports from the review model"
@@ -106,12 +74,32 @@ def main() -> None:
         result = crew.kickoff()
     report = _to_report(result)
 
+    artifacts = [
+        settings.scenario_rules_path,
+        settings.business_scenarios_path,
+        settings.test_cases_path,
+        settings.test_data_path,
+    ]
+    if all(path.exists() for path in artifacts):
+        metrics = score_suite(
+            settings.scenario_rules_path,
+            settings.business_scenarios_path,
+            settings.test_cases_path,
+            settings.test_data_path,
+            settings.pytest_result_path,
+        )
+        report.quality_score = metrics.total_score
+        report.quality_metrics = QualityMetricsModel.model_validate(
+            metrics.to_dict()
+        )
+
     settings.coverage_report_path.write_text(
         json.dumps(report.model_dump(), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    pytest_result = load_result(settings.pytest_result_path)
     settings.review_report_path.write_text(
-        _to_markdown(report), encoding="utf-8"
+        review_to_markdown(report, pytest_result), encoding="utf-8"
     )
 
     print(f"\nSaved: {settings.coverage_report_path}")

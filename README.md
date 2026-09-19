@@ -60,16 +60,39 @@ python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
 
 ## 全流程
 
-`run_pipeline.py` 按顺序执行 6 个 Agent：
+`run_pipeline.py` 分 4 个阶段执行：
 
 ```text
-场景解析员    input/scenario.md → output/scenario_rules.json
-数据库分析员  规则 + 数据库表结构 → output/business_scenarios.json
-用例设计师    规则 + 场景 → output/test_cases.json
-测试数据构造员 用例 + 规则 + 表结构 → output/test_data.json
-自动化代码生成员 用例 + 数据 → automated_tests/*.py
-质量审查员    全部产物 → output/coverage_report.json、output/review_report.md
+[1/4] 生成阶段（5 个 Agent）
+      场景解析员      input/scenario.md → output/scenario_rules.json
+      数据库分析员    规则 + 数据库表结构 → output/business_scenarios.json
+      用例设计师      规则 + 场景 → output/test_cases.json
+      测试数据构造员   用例 + 规则 + 表结构 → output/test_data.json
+      自动化代码生成员  用例 + 数据 → automated_tests/*.py
+
+[2/4] pytest 执行
+      运行生成的测试 → output/pytest_result.json
+
+[3/4] 质量审查（质量审查员）
+      规则、场景、用例、数据、pytest 结果 → output/coverage_report.json
+
+[4/4] 确定性评分
+      按固定公式覆盖 quality_score → output/review_report.md
 ```
+
+### 质量评分公式
+
+质量评分不再由大模型主观给出，而是按固定权重计算：
+
+```text
+规则覆盖率        40%   有场景 + 用例 + 数据的规则占比
+场景分类覆盖率    25%   normal / boundary / exception 覆盖情况
+测试数据完整率    20%   有用例数据的用例占比
+pytest 通过率     15%   实际执行通过率
+```
+
+例如样本测试 24 通过 / 5 条预期失败，评分为 97 分：测试套件质量高，
+5 条失败是数据库规则未落地，属于被测系统问题，而不是测试设计问题。
 
 ## 单独运行
 
@@ -82,7 +105,9 @@ python scripts\run_automation_code_generator.py
 python scripts\run_qa_reviewer.py
 ```
 
-代码生成员和审查员支持 `--reuse`，可以直接复用已有结果，不重新调用大模型。
+代码生成员和审查员支持 `--reuse`；完整流水线支持 `--reuse-generation`
+（跳过生成阶段）和 `--reuse-review`（跳过审查阶段），用于复查或调试，
+不重新调用大模型。
 
 ## 测试样本
 

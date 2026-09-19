@@ -21,7 +21,29 @@
 - UPDATE 状态流转组合缺失：待付款→已完成强制补 completed_at、待发货→已取消清空 completed_at 等状态迁移路径未测试（当前仅覆盖 INSERT）
 - 存量数据审计缺失：未验证 orders 表既有 400 行数据是否违反五条规则（存量违规数据检测）
 
-## Quality Score: 84/100
+## pytest Execution
+
+- Total: 29
+- Passed: 24
+- Failed: 5
+- Errors: 0
+- Pass rate: 82.76%
+
+### 规则未落地失败
+- samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_024
+- samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_025
+- samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_026
+- samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_027
+- samples.orders-rule-scenario.automated_tests.test_orders::test_tc_orders_028
+
+## Deterministic Quality Metrics
+
+- Rule coverage: 5/5 (100.00%)
+- Category coverage: 100.00%
+- Data completeness: 29/29 (100.00%)
+- Execution pass rate: 82.76%
+
+## Quality Score: 97/100
 
 ## Recommendations
 - 补充多规则同时违例的叠加组合用例（至少覆盖两条规则同时失败），验证校验逻辑叠加时的拒绝行为
