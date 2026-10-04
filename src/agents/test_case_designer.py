@@ -6,6 +6,7 @@ from crewai import Agent, LLM
 from crewai.skills import load_skill
 
 from config.settings import PROJECT_ROOT, get_settings
+from tool.build_pairwise_matrix import BuildPairwiseMatrixTool
 from tool.inspect_database import InspectDatabaseTool
 from tool.read_business_scenarios import ReadBusinessScenariosTool
 from tool.read_scenario_rules import ReadScenarioRulesTool
@@ -28,6 +29,7 @@ def build_test_case_designer() -> Agent:
             base_url=settings.base_url,
         ),
         tools=[
+            BuildPairwiseMatrixTool(),
             ReadScenarioRulesTool(),
             ReadBusinessScenariosTool(),
             InspectDatabaseTool(),

@@ -12,15 +12,15 @@ that cover every meaningful combination.
 
 ## Steps
 
-1. Use the `read_scenario_rules` tool to read the field-dependency rules.
-2. Use the `read_business_scenarios` tool to read the scenario context.
-3. Use the `inspect_database` tool to confirm real field names and types.
-4. Build a combination matrix for every dependency, for example:
-   - trigger value allowed and affected value allowed
-   - trigger value allowed and affected value forbidden
-   - trigger value at a boundary
-   - NULL values when the scenario does not define them
-5. Generate at least one test case per meaningful combination. Keep the
+1. Use the `build_pairwise_matrix` tool to get the minimized pairwise
+   combination matrix.
+2. Use `read_scenario_rules`, `read_business_scenarios` and `inspect_database`
+   to add rule, scenario and schema context.
+3. Generate one test case per pairwise combination. Do not expand the matrix
+   into a full cartesian product.
+4. For rules without structured dependencies, add boundary and exception cases
+   based on the business description.
+5. Keep the
    `normal`, `boundary` or `exception` category.
 6. Every test case must include:
    - `id`, `title` and the target `table`

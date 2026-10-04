@@ -12,11 +12,14 @@ def build_test_case_design_task(agent: Agent) -> Task:
     settings = get_settings()
     return Task(
         description=(
-            "先使用 read_scenario_rules 工具读取字段依赖规则。\n"
+            "先使用 build_pairwise_matrix 工具获取最小 pairwise 组合矩阵。\n"
+            "再使用 read_scenario_rules 工具读取字段依赖规则。\n"
             "再使用 read_business_scenarios 工具读取业务场景。\n"
             "再使用 inspect_database 工具核对真实字段名和类型。\n"
-            "根据规则中的 dependencies 生成字段组合矩阵，覆盖 allowed、"
-            "forbidden、boundary 和 NULL 情况。\n"
+            "优先为 pairwise 矩阵中的每个组合生成一条用例，"
+            "不要自行扩展成完整笛卡尔积。\n"
+            "对没有结构化 dependencies 的规则，按业务语义补充边界和异常用例。\n"
+            "组合用例要覆盖 allowed、forbidden、boundary 和 NULL 情况。\n"
             "每条用例保留 normal/boundary/exception 分类。\n"
             "每条用例必须包含 id、title、table、scenario_id、category、priority、"
             "rule_id、fields、preconditions、steps、test_data、expected_result、"

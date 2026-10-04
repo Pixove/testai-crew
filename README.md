@@ -82,6 +82,20 @@ python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
       按固定公式覆盖 quality_score → output/review_report.md
 ```
 
+### 组合用例最小化
+
+用例设计师会先调用 `build_pairwise_matrix` 工具，从规则的 dependencies
+中提取字段取值域，生成最小 pairwise 组合矩阵，优先为每个组合生成一条用例，
+避免字段多时笛卡尔积爆炸：
+
+```text
+2 个字段、少量取值   → 组合数接近笛卡尔积，无额外收益
+4 个字段 (4/4/2/2)   → 64 个笛卡尔积组合压缩为 16 个 pairwise 用例
+                     且所有两两字段组合仍被完整覆盖
+```
+
+没有结构化 dependencies 的规则，仍由模型按业务语义补充边界和异常用例。
+
 ### 增量生成
 
 流水线用内容 hash 判断是否需要重新调用生成 Agent：
