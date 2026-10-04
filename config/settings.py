@@ -41,6 +41,7 @@ class Settings:
     coverage_report_path: Path
     pytest_result_path: Path
     pytest_junit_path: Path
+    pipeline_cache_path: Path
     api_key: str
     model_name: str
     base_url: str | None
@@ -111,6 +112,11 @@ def get_settings() -> Settings:
     )
     if not pytest_junit_path.is_absolute():
         pytest_junit_path = PROJECT_ROOT / pytest_junit_path
+    pipeline_cache_path = Path(
+        os.getenv("PIPELINE_CACHE_PATH", "output/pipeline_cache.json")
+    )
+    if not pipeline_cache_path.is_absolute():
+        pipeline_cache_path = PROJECT_ROOT / pipeline_cache_path
     return Settings(
         database_path=database_path,
         schema_output_path=schema_output_path,
@@ -125,6 +131,7 @@ def get_settings() -> Settings:
         coverage_report_path=coverage_report_path,
         pytest_result_path=pytest_result_path,
         pytest_junit_path=pytest_junit_path,
+        pipeline_cache_path=pipeline_cache_path,
         api_key=os.getenv("OPENAI_API_KEY", ""),
         model_name=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         base_url=os.getenv("OPENAI_BASE_URL") or None,

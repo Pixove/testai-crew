@@ -19,36 +19,58 @@ from src.tasks.test_case_design import build_test_case_design_task
 from src.tasks.test_data_generation import build_test_data_generation_task
 
 
-def build_generation_crew() -> Crew:
-    """Build the first five agents: rules to generated pytest code."""
+def build_scenario_crew() -> Crew:
+    """Build the scenario analyst stage."""
     scenario_agent = build_scenario_analyst()
+    scenario_task = build_scenario_analysis_task(scenario_agent)
+    return Crew(
+        name="scenario-analysis",
+        agents=[scenario_agent],
+        tasks=[scenario_task],
+        process=Process.sequential,
+        verbose=True,
+    )
+
+
+def build_analysis_crew() -> Crew:
+    """Build database analysis through pytest code generation."""
     database_agent = build_database_analyst()
     test_case_agent = build_test_case_designer()
     test_data_agent = build_test_data_generator()
     code_agent = build_automation_code_generator()
 
-    scenario_task = build_scenario_analysis_task(scenario_agent)
     schema_task = build_schema_analysis_task(database_agent)
     test_case_task = build_test_case_design_task(test_case_agent)
     test_data_task = build_test_data_generation_task(test_data_agent)
     code_task = build_automation_code_generation_task(code_agent)
 
     return Crew(
-        name="generation-pipeline",
+        name="analysis-generation",
         agents=[
-            scenario_agent,
             database_agent,
             test_case_agent,
             test_data_agent,
             code_agent,
         ],
         tasks=[
-            scenario_task,
             schema_task,
             test_case_task,
             test_data_task,
             code_task,
         ],
+        process=Process.sequential,
+        verbose=True,
+    )
+
+
+def build_generation_crew() -> Crew:
+    """Build the full generation stage: scenario rules to pytest code."""
+    scenario = build_scenario_crew()
+    analysis = build_analysis_crew()
+    return Crew(
+        name="generation-pipeline",
+        agents=[*scenario.agents, *analysis.agents],
+        tasks=[*scenario.tasks, *analysis.tasks],
         process=Process.sequential,
         verbose=True,
     )

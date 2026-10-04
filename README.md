@@ -82,6 +82,20 @@ python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
       按固定公式覆盖 quality_score → output/review_report.md
 ```
 
+### 增量生成
+
+流水线用内容 hash 判断是否需要重新调用生成 Agent：
+
+```text
+场景未变 + 数据库结构未变 → 跳过全部生成 Agent
+场景未变 + 数据库结构变化 → 只重跑数据库分析和后续阶段
+场景变化                 → 重跑场景解析和后续阶段
+产物缺失                 → 自动重跑对应阶段
+```
+
+缓存状态保存在 `output/pipeline_cache.json`。使用 `--no-incremental`
+可以强制全量生成。
+
 ### 质量评分公式
 
 质量评分不再由大模型主观给出，而是按固定权重计算：

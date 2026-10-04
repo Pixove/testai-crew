@@ -12,10 +12,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from config.settings import get_settings
+from src.cache.fingerprint import (
+    CacheState,
+    analysis_artifacts_exist,
+    build_run_key,
+    scenario_artifacts_exist,
+    scenario_fingerprint,
+    schema_fingerprint,
+    sha256_file,
+)
 from src.crew.full_pipeline import (
+    build_analysis_crew,
     build_code_repair_crew,
-    build_generation_crew,
     build_qa_crew,
+    build_scenario_crew,
 )
 from src.models.generated_suite import GeneratedTestSuite
 from src.models.review import QualityMetrics as QualityMetricsModel
@@ -23,6 +33,76 @@ from src.models.review import ReviewReport
 from src.quality.scorer import score_suite
 from src.testing.code_validator import validate_generated_files
 from src.testing.pytest_runner import load_result, run_pytest, save_result
+
+
+def resolve_incremental_state(settings, incremental: bool) -> dict:
+    """Decide which generation stages can be reused."""
+    scenario_hash = scenario_fingerprint(settings)
+    schema_hash = schema_fingerprint(settings)
+    current_run_key = build_run_key(scenario_hash, schema_hash)
+    cache = CacheState.load(settings.pipeline_cache_path)
+
+    if incremental:
+        scenario_reusable = (
+            bool(scenario_hash)
+            and cache.scenario_hash == scenario_hash
+            and scenario_artifacts_exist(settings)
+        )
+        analysis_reusable = (
+            bool(current_run_key)
+            and cache.scenario_hash == scenario_hash
+            and cache.schema_hash == schema_hash
+            and analysis_artifacts_exist(settings)
+        )
+    else:
+        scenario_reusable = False
+        analysis_reusable = False
+
+    return {
+        "cache": cache,
+        "scenario_reusable": scenario_reusable,
+        "analysis_reusable": analysis_reusable,
+        "scenario_hash": scenario_hash,
+        "schema_hash": schema_hash,
+        "run_key": current_run_key,
+    }
+
+
+def run_generation_stage(
+    settings, reuse_generation: bool, incremental: bool
+) -> None:
+    """Run the generation stage with optional incremental reuse."""
+    if reuse_generation:
+        print("Reusing existing generation artifacts (--reuse-generation).")
+        return
+
+    state = resolve_incremental_state(settings, incremental)
+    cache = state["cache"]
+    scenario_hash = state["scenario_hash"]
+    schema_hash = state["schema_hash"]
+    current_run_key = state["run_key"]
+
+    if state["scenario_reusable"]:
+        print("Incremental: scenario unchanged, skipping scenario analyst.")
+    else:
+        print("Running scenario analyst stage...")
+        build_scenario_crew().kickoff()
+
+    if state["analysis_reusable"]:
+        print(
+            "Incremental: scenario and schema unchanged, "
+            "skipping analysis and code generation."
+        )
+    else:
+        print("Running database analysis and code generation stage...")
+        build_analysis_crew().kickoff()
+
+    cache.scenario_hash = scenario_hash
+    cache.schema_hash = schema_hash
+    cache.run_key = current_run_key
+    cache.scenario_rules_hash = sha256_file(settings.scenario_rules_path)
+    cache.save(settings.pipeline_cache_path)
+    print(f"Cache updated: {settings.pipeline_cache_path}")
 
 
 def write_generated_tests(settings) -> list[str]:
@@ -238,6 +318,11 @@ def main() -> None:
         default=2,
         help="Max static-validation repair attempts (0 disables repair)",
     )
+    parser.add_argument(
+        "--no-incremental",
+        action="store_true",
+        help="Disable hash-based incremental generation",
+    )
     args = parser.parse_args()
 
     if args.scenario_file:
@@ -246,12 +331,9 @@ def main() -> None:
     settings = get_settings()
 
     print("=== [1/4] GENERATION STAGE ===")
-    if args.reuse_generation:
-        print("Reusing existing generation artifacts.")
-    else:
-        generation_crew = build_generation_crew()
-        generation_result = generation_crew.kickoff()
-        print(generation_result)
+    run_generation_stage(
+        settings, args.reuse_generation, not args.no_incremental
+    )
 
     test_files, validation = write_and_validate(settings, args.max_repairs)
     if not validation["valid"]:
