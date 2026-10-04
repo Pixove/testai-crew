@@ -12,14 +12,16 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from src.quality.combination_matrix import evaluate_combination_coverage
 from src.models.scenario_rules import ScenarioRulesDocument
 from src.models.schema import BusinessScenarioDocument
 from src.models.test_case import TestCaseDocument
 from src.models.test_data import TestDataDocument
 
-WEIGHT_RULE_COVERAGE = 40.0
-WEIGHT_CATEGORY_COVERAGE = 25.0
-WEIGHT_DATA_COMPLETENESS = 20.0
+WEIGHT_RULE_COVERAGE = 30.0
+WEIGHT_COMBINATION_COVERAGE = 20.0
+WEIGHT_CATEGORY_COVERAGE = 20.0
+WEIGHT_DATA_COMPLETENESS = 15.0
 WEIGHT_EXECUTION_PASS_RATE = 15.0
 CATEGORIES = {"normal", "boundary", "exception"}
 
@@ -27,16 +29,21 @@ CATEGORIES = {"normal", "boundary", "exception"}
 @dataclass
 class QualityMetrics:
     rule_coverage: float
+    combination_coverage: float
     category_coverage: float
     data_completeness: float
     execution_pass_rate: float
     rule_coverage_score: float
+    combination_coverage_score: float
     category_coverage_score: float
     data_completeness_score: float
     execution_score: float
     total_score: int
     rules_total: int
     rules_fully_covered: int
+    combinations_total: int
+    combinations_covered: int
+    combinations_unparsed: int
     test_cases_total: int
     test_cases_with_data: int
     tests_total: int
@@ -137,6 +144,8 @@ def score_suite(
         )
 
     rule_coverage = _ratio(rules_fully_covered, len(rule_ids))
+    combination = evaluate_combination_coverage(rules_doc, cases_doc)
+    combination_coverage = combination.ratio
     category_coverage = (
         sum(category_ratios) / len(category_ratios) if category_ratios else 0.0
     )
@@ -151,37 +160,56 @@ def score_suite(
     execution_pass_rate = float(pytest_stats["pass_rate"])
     execution_available = bool(pytest_stats["available"])
 
+    components: list[tuple[float, float]] = [
+        (rule_coverage, WEIGHT_RULE_COVERAGE),
+        (category_coverage, WEIGHT_CATEGORY_COVERAGE),
+        (data_completeness, WEIGHT_DATA_COMPLETENESS),
+    ]
+    if combination.total > 0:
+        components.append((combination_coverage, WEIGHT_COMBINATION_COVERAGE))
+    if execution_available:
+        components.append((execution_pass_rate, WEIGHT_EXECUTION_PASS_RATE))
+
+    available_weight = sum(weight for _, weight in components)
+    total = (
+        sum(ratio * weight for ratio, weight in components)
+        / available_weight
+        * 100
+        if available_weight
+        else 0.0
+    )
+
     rule_score = rule_coverage * WEIGHT_RULE_COVERAGE
+    combination_score = (
+        combination_coverage * WEIGHT_COMBINATION_COVERAGE
+        if combination.total > 0
+        else 0.0
+    )
     category_score = category_coverage * WEIGHT_CATEGORY_COVERAGE
     data_score = data_completeness * WEIGHT_DATA_COMPLETENESS
-
-    if execution_available:
-        execution_score = execution_pass_rate * WEIGHT_EXECUTION_PASS_RATE
-        total = rule_score + category_score + data_score + execution_score
-    else:
-        # Without execution data, normalize the remaining weights to 100.
-        available_weight = (
-            WEIGHT_RULE_COVERAGE
-            + WEIGHT_CATEGORY_COVERAGE
-            + WEIGHT_DATA_COMPLETENESS
-        )
-        execution_score = 0.0
-        total = (
-            (rule_score + category_score + data_score) / available_weight * 100
-        )
+    execution_score = (
+        execution_pass_rate * WEIGHT_EXECUTION_PASS_RATE
+        if execution_available
+        else 0.0
+    )
 
     return QualityMetrics(
         rule_coverage=round(rule_coverage, 4),
+        combination_coverage=round(combination_coverage, 4),
         category_coverage=round(category_coverage, 4),
         data_completeness=round(data_completeness, 4),
         execution_pass_rate=round(execution_pass_rate, 4),
         rule_coverage_score=round(rule_score, 2),
+        combination_coverage_score=round(combination_score, 2),
         category_coverage_score=round(category_score, 2),
         data_completeness_score=round(data_score, 2),
         execution_score=round(execution_score, 2),
         total_score=int(round(total)),
         rules_total=len(rule_ids),
         rules_fully_covered=rules_fully_covered,
+        combinations_total=combination.total,
+        combinations_covered=combination.covered,
+        combinations_unparsed=len(combination.unparsed),
         test_cases_total=test_cases_total,
         test_cases_with_data=test_cases_with_data,
         tests_total=int(pytest_stats["total"]),

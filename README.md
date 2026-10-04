@@ -85,11 +85,16 @@ python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
 质量评分不再由大模型主观给出，而是按固定权重计算：
 
 ```text
-规则覆盖率        40%   有场景 + 用例 + 数据的规则占比
-场景分类覆盖率    25%   normal / boundary / exception 覆盖情况
-测试数据完整率    20%   有用例数据的用例占比
+规则覆盖率        30%   有场景 + 用例 + 数据的规则占比
+组合覆盖率        20%   可从规则结构化解析并已被测试数据覆盖的组合占比
+场景分类覆盖率    20%   normal / boundary / exception 覆盖情况
+测试数据完整率    15%   有用例数据的用例占比
 pytest 通过率     15%   实际执行通过率
 ```
+
+组合覆盖率由程序从 `scenario_rules.json` 的 `dependencies` 生成期望组合，
+再与 `test_cases.json` 的测试数据比对，不依赖模型主观判断。没有结构化
+`dependencies` 的规则会在报告中标记为“无法程序化校验”，不计入分母。
 
 例如样本测试 24 通过 / 5 条预期失败，评分为 97 分：测试套件质量高，
 5 条失败是数据库规则未落地，属于被测系统问题，而不是测试设计问题。

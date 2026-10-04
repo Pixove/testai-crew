@@ -94,6 +94,21 @@ def review_to_markdown(
             f"- Rule coverage: {metrics.rules_fully_covered}/"
             f"{metrics.rules_total} ({metrics.rule_coverage:.2%})"
         )
+        if metrics.combinations_total > 0:
+            lines.append(
+                f"- Combination coverage: {metrics.combinations_covered}/"
+                f"{metrics.combinations_total} "
+                f"({metrics.combination_coverage:.2%})"
+            )
+        else:
+            lines.append(
+                "- Combination coverage: no machine-readable combinations"
+            )
+        if metrics.combinations_unparsed:
+            lines.append(
+                "- Rules without machine-readable dependencies: "
+                f"{metrics.combinations_unparsed}"
+            )
         lines.append(f"- Category coverage: {metrics.category_coverage:.2%}")
         lines.append(
             f"- Data completeness: {metrics.test_cases_with_data}/"

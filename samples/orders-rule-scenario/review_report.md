@@ -39,6 +39,8 @@
 ## Deterministic Quality Metrics
 
 - Rule coverage: 5/5 (100.00%)
+- Combination coverage: 2/2 (100.00%)
+- Rules without machine-readable dependencies: 3
 - Category coverage: 100.00%
 - Data completeness: 29/29 (100.00%)
 - Execution pass rate: 82.76%

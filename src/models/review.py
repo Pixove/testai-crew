@@ -19,6 +19,10 @@ class QualityMetrics(BaseModel):
     """Deterministic metrics computed from generated artifacts."""
 
     rule_coverage: float = Field(description="Ratio of fully covered rules")
+    combination_coverage: float = Field(
+        default=0.0,
+        description="Ratio of covered machine-readable rule combinations"
+    )
     category_coverage: float = Field(
         description="Average normal/boundary/exception coverage ratio"
     )
@@ -29,6 +33,10 @@ class QualityMetrics(BaseModel):
         description="pytest pass rate, 0 when execution data is unavailable"
     )
     rule_coverage_score: float = Field(description="Weighted rule coverage score")
+    combination_coverage_score: float = Field(
+        default=0.0,
+        description="Weighted combination coverage score"
+    )
     category_coverage_score: float = Field(
         description="Weighted category coverage score"
     )
@@ -40,6 +48,18 @@ class QualityMetrics(BaseModel):
     rules_total: int = Field(description="Total number of business rules")
     rules_fully_covered: int = Field(
         description="Rules that have scenarios, test cases and test data"
+    )
+    combinations_total: int = Field(
+        default=0,
+        description="Machine-readable combinations derived from rule dependencies"
+    )
+    combinations_covered: int = Field(
+        default=0,
+        description="Combinations covered by generated test data"
+    )
+    combinations_unparsed: int = Field(
+        default=0,
+        description="Rule values that could not be parsed programmatically"
     )
     test_cases_total: int = Field(description="Total number of test cases")
     test_cases_with_data: int = Field(
