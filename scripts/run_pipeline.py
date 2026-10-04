@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +31,7 @@ from src.crew.full_pipeline import (
 from src.models.generated_suite import GeneratedTestSuite
 from src.models.review import QualityMetrics as QualityMetricsModel
 from src.models.review import ReviewReport
+from src.observability.metrics import MetricsCollector
 from src.quality.scorer import score_suite
 from src.testing.code_validator import validate_generated_files
 from src.testing.pytest_runner import load_result, run_pytest, save_result
@@ -69,11 +71,16 @@ def resolve_incremental_state(settings, incremental: bool) -> dict:
 
 
 def run_generation_stage(
-    settings, reuse_generation: bool, incremental: bool
+    settings,
+    reuse_generation: bool,
+    incremental: bool,
+    collector: MetricsCollector | None = None,
 ) -> None:
     """Run the generation stage with optional incremental reuse."""
     if reuse_generation:
         print("Reusing existing generation artifacts (--reuse-generation).")
+        if collector:
+            collector.record("generation_stage", skipped=True)
         return
 
     state = resolve_incremental_state(settings, incremental)
@@ -84,18 +91,38 @@ def run_generation_stage(
 
     if state["scenario_reusable"]:
         print("Incremental: scenario unchanged, skipping scenario analyst.")
+        if collector:
+            collector.record("scenario_analysis", skipped=True)
     else:
         print("Running scenario analyst stage...")
-        build_scenario_crew().kickoff()
+        start = time.perf_counter()
+        scenario_crew = build_scenario_crew()
+        scenario_crew.kickoff()
+        if collector:
+            collector.record(
+                "scenario_analysis",
+                crew=scenario_crew,
+                duration_seconds=time.perf_counter() - start,
+            )
 
     if state["analysis_reusable"]:
         print(
             "Incremental: scenario and schema unchanged, "
             "skipping analysis and code generation."
         )
+        if collector:
+            collector.record("analysis_and_generation", skipped=True)
     else:
         print("Running database analysis and code generation stage...")
-        build_analysis_crew().kickoff()
+        start = time.perf_counter()
+        analysis_crew = build_analysis_crew()
+        analysis_crew.kickoff()
+        if collector:
+            collector.record(
+                "analysis_and_generation",
+                crew=analysis_crew,
+                duration_seconds=time.perf_counter() - start,
+            )
 
     cache.scenario_hash = scenario_hash
     cache.schema_hash = schema_hash
@@ -126,7 +153,9 @@ def write_generated_tests(settings) -> list[str]:
 
 
 def write_and_validate(
-    settings, max_repairs: int = 2
+    settings,
+    max_repairs: int = 2,
+    collector: MetricsCollector | None = None,
 ) -> tuple[list[str], dict]:
     """Write generated tests and repair them when static validation fails."""
 
@@ -146,8 +175,15 @@ def write_and_validate(
         print(
             f"Static validation failed ({attempts}/{max_repairs}), repairing..."
         )
+        start = time.perf_counter()
         repair_crew = build_code_repair_crew(report.to_dict())
         repair_crew.kickoff()
+        if collector:
+            collector.record(
+                f"code_repair_{attempts}",
+                crew=repair_crew,
+                duration_seconds=time.perf_counter() - start,
+            )
         test_files = write_generated_tests(settings)
         files = load_files()
         report = validate_generated_files(files)
@@ -330,18 +366,26 @@ def main() -> None:
 
     settings = get_settings()
 
+    collector = MetricsCollector(settings.run_metrics_path)
+
     print("=== [1/4] GENERATION STAGE ===")
     run_generation_stage(
-        settings, args.reuse_generation, not args.no_incremental
+        settings, args.reuse_generation, not args.no_incremental, collector
     )
 
-    test_files, validation = write_and_validate(settings, args.max_repairs)
+    test_files, validation = write_and_validate(
+        settings, args.max_repairs, collector
+    )
     if not validation["valid"]:
         print("Warning: static validation still has errors; pytest may fail.")
 
     print("\n=== [2/4] PYTEST EXECUTION ===")
+    start = time.perf_counter()
     pytest_result = run_pytest(
         test_files, settings.pytest_junit_path, PROJECT_ROOT
+    )
+    collector.record(
+        "pytest_execution", duration_seconds=time.perf_counter() - start
     )
     save_result(settings.pytest_result_path, pytest_result)
     print(
@@ -359,14 +403,28 @@ def main() -> None:
     print("\n=== [3/4] QA REVIEW STAGE ===")
     if args.reuse_review:
         print("Reusing existing coverage report.")
+        collector.record("qa_review", skipped=True)
     else:
+        start = time.perf_counter()
         qa_crew = build_qa_crew()
         qa_result = qa_crew.kickoff()
         print(qa_result)
+        collector.record(
+            "qa_review",
+            crew=qa_crew,
+            duration_seconds=time.perf_counter() - start,
+        )
 
+    start = time.perf_counter()
     score = apply_deterministic_score(settings)
     write_review_reports(settings)
+    collector.record(
+        "deterministic_scoring", duration_seconds=time.perf_counter() - start
+    )
+    collector.save()
     print(f"\n=== [4/4] DETERMINISTIC QUALITY SCORE: {score}/100 ===")
+    print(f"Metrics: {settings.run_metrics_path}")
+    print(f"Summary: {collector.summary()}")
 
     print("\nOutputs:")
     print(f"  {settings.scenario_rules_path}")

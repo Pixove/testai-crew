@@ -42,6 +42,7 @@ class Settings:
     pytest_result_path: Path
     pytest_junit_path: Path
     pipeline_cache_path: Path
+    run_metrics_path: Path
     api_key: str
     model_name: str
     base_url: str | None
@@ -117,6 +118,11 @@ def get_settings() -> Settings:
     )
     if not pipeline_cache_path.is_absolute():
         pipeline_cache_path = PROJECT_ROOT / pipeline_cache_path
+    run_metrics_path = Path(
+        os.getenv("RUN_METRICS_PATH", "output/run_metrics.json")
+    )
+    if not run_metrics_path.is_absolute():
+        run_metrics_path = PROJECT_ROOT / run_metrics_path
     return Settings(
         database_path=database_path,
         schema_output_path=schema_output_path,
@@ -132,6 +138,7 @@ def get_settings() -> Settings:
         pytest_result_path=pytest_result_path,
         pytest_junit_path=pytest_junit_path,
         pipeline_cache_path=pipeline_cache_path,
+        run_metrics_path=run_metrics_path,
         api_key=os.getenv("OPENAI_API_KEY", ""),
         model_name=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         base_url=os.getenv("OPENAI_BASE_URL") or None,

@@ -96,6 +96,20 @@ python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
 缓存状态保存在 `output/pipeline_cache.json`。使用 `--no-incremental`
 可以强制全量生成。
 
+### 运行指标
+
+每次运行会记录各阶段耗时、token 消耗、重试次数和工具调用，保存到
+`output/run_metrics.json`：
+
+```text
+scenario_analysis        场景解析阶段
+analysis_and_generation  数据库分析 + 用例设计 + 数据构造 + 代码生成
+code_repair_N            第 N 次静态校验修复
+pytest_execution         pytest 执行
+qa_review                质量审查
+deterministic_scoring    确定性评分
+```
+
 ### 质量评分公式
 
 质量评分不再由大模型主观给出，而是按固定权重计算：
