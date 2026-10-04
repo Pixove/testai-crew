@@ -6,6 +6,7 @@ from crewai import Agent, LLM
 from crewai.skills import load_skill
 
 from config.settings import PROJECT_ROOT, get_settings
+from tool.read_generated_suite import ReadGeneratedSuiteTool
 from tool.inspect_database import InspectDatabaseTool
 from tool.read_scenario_rules import ReadScenarioRulesTool
 from tool.read_test_cases import ReadTestCasesTool
@@ -32,6 +33,7 @@ def build_automation_code_generator() -> Agent:
             ReadScenarioRulesTool(),
             ReadTestCasesTool(),
             ReadTestDataTool(),
+            ReadGeneratedSuiteTool(),
             InspectDatabaseTool(),
         ],
         skills=skills,

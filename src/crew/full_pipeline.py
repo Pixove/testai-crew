@@ -11,6 +11,7 @@ from src.agents.scenario_analyst import build_scenario_analyst
 from src.agents.test_case_designer import build_test_case_designer
 from src.agents.test_data_generator import build_test_data_generator
 from src.tasks.automation_code_generation import build_automation_code_generation_task
+from src.tasks.code_repair import build_code_repair_task
 from src.tasks.qa_review import build_qa_review_task
 from src.tasks.schema_analysis import build_schema_analysis_task
 from src.tasks.scenario_analysis import build_scenario_analysis_task
@@ -61,6 +62,19 @@ def build_qa_crew() -> Crew:
         name="qa-review",
         agents=[qa_agent],
         tasks=[qa_task],
+        process=Process.sequential,
+        verbose=True,
+    )
+
+
+def build_code_repair_crew(validation_report: dict) -> Crew:
+    """Build a crew that repairs generated pytest files failing validation."""
+    agent = build_automation_code_generator()
+    task = build_code_repair_task(agent, validation_report)
+    return Crew(
+        name="code-repair",
+        agents=[agent],
+        tasks=[task],
         process=Process.sequential,
         verbose=True,
     )

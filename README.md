@@ -69,6 +69,8 @@ python scripts\run_pipeline.py --scenario-file input\scenario_orders.md
       用例设计师      规则 + 场景 → output/test_cases.json
       测试数据构造员   用例 + 规则 + 表结构 → output/test_data.json
       自动化代码生成员  用例 + 数据 → automated_tests/*.py
+      静态校验        语法 / conftest / test_* 函数检查
+      自愈重试        校验失败时自动让代码生成员修复（--max-repairs，默认 2）
 
 [2/4] pytest 执行
       运行生成的测试 → output/pytest_result.json

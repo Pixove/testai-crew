@@ -12,11 +12,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from config.settings import get_settings
-from src.crew.full_pipeline import build_generation_crew, build_qa_crew
+from src.crew.full_pipeline import (
+    build_code_repair_crew,
+    build_generation_crew,
+    build_qa_crew,
+)
 from src.models.generated_suite import GeneratedTestSuite
 from src.models.review import QualityMetrics as QualityMetricsModel
 from src.models.review import ReviewReport
 from src.quality.scorer import score_suite
+from src.testing.code_validator import validate_generated_files
 from src.testing.pytest_runner import load_result, run_pytest, save_result
 
 
@@ -38,6 +43,43 @@ def write_generated_tests(settings) -> list[str]:
         print(f"Wrote: {target}")
         written.append(str(target))
     return written
+
+
+def write_and_validate(
+    settings, max_repairs: int = 2
+) -> tuple[list[str], dict]:
+    """Write generated tests and repair them when static validation fails."""
+
+    def load_files() -> dict[str, str]:
+        suite = GeneratedTestSuite.model_validate_json(
+            settings.generated_test_suite_path.read_text(encoding="utf-8")
+        )
+        return {item.path: item.content for item in suite.test_files}
+
+    test_files = write_generated_tests(settings)
+    files = load_files()
+    report = validate_generated_files(files)
+    attempts = 0
+
+    while not report.valid and attempts < max_repairs:
+        attempts += 1
+        print(
+            f"Static validation failed ({attempts}/{max_repairs}), repairing..."
+        )
+        repair_crew = build_code_repair_crew(report.to_dict())
+        repair_crew.kickoff()
+        test_files = write_generated_tests(settings)
+        files = load_files()
+        report = validate_generated_files(files)
+
+    if report.valid:
+        print(f"Static validation passed ({len(files)} files).")
+    else:
+        print(
+            "Static validation still failing after "
+            f"{attempts} repair attempt(s)."
+        )
+    return test_files, report.to_dict()
 
 
 def review_to_markdown(
@@ -190,6 +232,12 @@ def main() -> None:
         action="store_true",
         help="Skip the QA crew and reuse the existing coverage report",
     )
+    parser.add_argument(
+        "--max-repairs",
+        type=int,
+        default=2,
+        help="Max static-validation repair attempts (0 disables repair)",
+    )
     args = parser.parse_args()
 
     if args.scenario_file:
@@ -205,7 +253,9 @@ def main() -> None:
         generation_result = generation_crew.kickoff()
         print(generation_result)
 
-    test_files = write_generated_tests(settings)
+    test_files, validation = write_and_validate(settings, args.max_repairs)
+    if not validation["valid"]:
+        print("Warning: static validation still has errors; pytest may fail.")
 
     print("\n=== [2/4] PYTEST EXECUTION ===")
     pytest_result = run_pytest(
