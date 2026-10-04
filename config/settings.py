@@ -26,6 +26,11 @@ def _load_dotenv() -> None:
             os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
+# Load .env at import time so CrewAI reads its telemetry switches before the
+# crewai package is imported by agent modules.
+_load_dotenv()
+
+
 @dataclass(frozen=True)
 class Settings:
     database_path: Path
